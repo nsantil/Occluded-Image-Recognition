@@ -10,22 +10,31 @@ While the original NOMAD dataset primarily focuses on occluded images of people,
 The current pipeline is structured to flow as the diagram below depicts:
 
 [NOMAD Dataset]
+
       ↓
 prepare_dataset.py
+
       ↓
 [Cleaned Image Pool]
+
       ↓
 train.py (YOLO Model)
+
       ↓
 generate_labels.py (Pseudo-label generation)
+
       ↓
 export_data.py (CVAT chunking)
+
       ↓
 [CVAT Review & Validation]
+
       ↓
 [Verified Dataset]
+
       ↓
 train.py (retraining loop)
+
 
 The models used in this project are YOLOv26n and YOLOv8n. The end goal of this project is for an FPV drone to provide real-time feedback using YOLOv8n due to its lightweight architecture and inference speed. 
 
@@ -33,6 +42,7 @@ During the annotation process YOLOv26n is used as a teacher model to generate ps
 
 
 Script explanations:
+
     prep_dataset.py:
         Extracts and consolidates the images from the Actor based folders into a unified dataset.
 
