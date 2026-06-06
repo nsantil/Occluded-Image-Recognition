@@ -9,31 +9,23 @@ While the original NOMAD dataset primarily focuses on occluded images of people,
 
 The current pipeline is structured to flow as the diagram below depicts:
 
-[NOMAD Dataset]
-
-      ↓
-prepare_dataset.py
-
-      ↓
-[Cleaned Image Pool]
-
-      ↓
-train.py (YOLO Model)
-
-      ↓
-generate_labels.py (Pseudo-label generation)
-
-      ↓
-export_data.py (CVAT chunking)
-
-      ↓
-[CVAT Review & Validation]
-
-      ↓
-[Verified Dataset]
-
-      ↓
-train.py (retraining loop)
+      [NOMAD Dataset]
+            ↓
+      prepare_dataset.py
+            ↓
+      [Cleaned Image Pool]
+            ↓
+      train.py (YOLO Model)
+            ↓
+      generate_labels.py (Pseudo-label generation)
+            ↓
+      export_data.py (CVAT chunking)
+            ↓
+      [CVAT Review & Validation]
+            ↓
+      [Verified Dataset]
+            ↓
+      train.py (retraining loop)
 
 
 The models used in this project are YOLOv26n and YOLOv8n. The end goal of this project is for an FPV drone to provide real-time feedback using YOLOv8n due to its lightweight architecture and inference speed. 
@@ -43,21 +35,21 @@ During the annotation process YOLOv26n is used as a teacher model to generate ps
 
 Script explanations:
 
-    prep_dataset.py:
+    prep_dataset.py <DEST_DIR>:
         Extracts and consolidates the images from the Actor based folders into a unified dataset.
 
-    train.py:
+    train.py <MODEL_DIR>:
         Handles model training and hyperparameter configuration for each run.
 
-    utils.py:
+    utils.py <IMAGE_EXT>, <SOURCE_DIR>:
         Image/label pairing
         Train/validation splitting
         Randomized sampling for dataset chunk generation
 
-    generate_labels.py:
+    generate_labels.py <MODEL_DIR>:
         Generates pseudo-labels using a trained YOLO model to accelerate dataset annotation and expansion
 
-    export_data.py:
+    export_data.py <SOURCE_DIR>, <obj_data>, <obj_names>, <IMAGE_EXT>:
         Creates CVAT-compatible dataset chunks (~3.8GB each) by packaging image-label pairs for annotation and validation workflows.
 
 In summary, this project builds a continuously improving dataset for occlusion-heavy object detection by integrating model-assisted annotation with human validation, enabling progressive refinement of detection performance over time, which is then deployed using a lightweight model on an FPV drone for real-time inference.
