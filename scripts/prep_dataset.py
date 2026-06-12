@@ -1,9 +1,10 @@
 import shutil
 from pathlib import Path
 
-def unzip_data(dest_dir):
+
+def unzip_data(DEST_DIR):
     root_dir = Path('.')
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    DEST_DIR.mkdir(parents=True, exist_ok=True)
 
     for zip_file in root_dir.glob('Actor*.zip'):
         shutil.unpack_archive(zip_file, root_dir)
@@ -11,7 +12,7 @@ def unzip_data(dest_dir):
     for actor_dir in root_dir.glob('Actor*'):
         if actor_dir.is_dir():
             for image in actor_dir.rglob('*.jpg'):
-                shutil.move(str(image), dest_dir/image.name)
+                shutil.move(str(image), DEST_DIR/image.name)
 
     for actor_dir in root_dir.glob('Actor*'):
         if actor_dir.is_dir():

@@ -4,6 +4,9 @@ import scripts.utils as utils
 
 from pathlib import Path
 
+base_output_dir = Path('./dataset_chunks')
+target_size = int(3.8 * 1024**3)
+
 def create_chunk_dirs(chunk_id, base_output_dir, obj_data, obj_names):
     chunk_dir = base_output_dir / f'dataset_chunk_{chunk_id}'
     image_dir = chunk_dir / 'images'
@@ -12,8 +15,12 @@ def create_chunk_dirs(chunk_id, base_output_dir, obj_data, obj_names):
     image_dir.mkdir(parents=True, exist_ok=True)
     label_dir.mkdir(parents=True, exist_ok=True)
 
+    assert obj_data.exists()
+    assert obj_names.exists()
+
     shutil.copyfile(obj_data, chunk_dir/'obj.data')
     shutil.copyfile(obj_names, chunk_dir/'obj.names')
+
 
     train_file = chunk_dir/'train.txt'
     train_file.write_text('')
@@ -25,12 +32,15 @@ def finalize_chunk(chunk_dir):
     print(f"Created: {zip_path}")
 
 
-def generate_random_chunks(target_size, source_dir, base_output_dir, obj_data, obj_names, image_extensions):
+def generate_random_chunks(SOURCE_DIR, obj_data, obj_names, image_extensions):
     chunk_id = 0
     current_size = 0
 
-    pairs = []
-    utils.create_pairs(pairs, image_extensions, source_dir)
+    pairs = utils.create_pairs(image_extensions, SOURCE_DIR)
+
+    if not pairs:
+        print("No image-label pairs found.")
+        return
 
     chunk_dir, image_target_dir, label_target_dir, train_file = create_chunk_dirs(chunk_id, base_output_dir, obj_data, obj_names)
 

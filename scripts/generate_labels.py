@@ -3,8 +3,8 @@ from pathlib import Path
 
 from ultralytics import YOLO
 
-def detect(model_dir):
-    model = YOLO(model_dir)
+def detect(MODEL_DIR):
+    model = YOLO(MODEL_DIR)
     source = Path("./images and labels")
     labels_dir = Path("./runs/detect/labels_only/labels")
     labels_only_dir = Path('./runs/detect/labels_only')

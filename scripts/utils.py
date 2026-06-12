@@ -3,11 +3,19 @@ import shutil
 
 from pathlib import Path
 
-def create_pairs(pairs: list, image_extensions, source_dir):
+IMAGE_TRAIN_TARGET_DIR = Path('./images/train')
+LABELS_TRAIN_TARGET_DIR = Path('./labels/train')
+IMAGE_VAL_TARGET_DIR = Path('./images/val')
+LABELS_VAL_TARGET_DIR = Path('./labels/val')
+
+def create_pairs(image_extensions, SOURCE_DIR):
+
+    pairs = []
+
     image_extensions = {ext if ext.startswith('.') else f'.{ext}' for ext in image_extensions}
 
     for extention in image_extensions:
-        for image_path in source_dir.rglob(f"*{extention}"):
+        for image_path in SOURCE_DIR.rglob(f"*{extention}"):
                 labels_path = image_path.with_suffix('.txt')
 
                 if labels_path.exists():
@@ -16,35 +24,55 @@ def create_pairs(pairs: list, image_extensions, source_dir):
                     print(f"Missing label for {image_path.name}")
 
     random.shuffle(pairs)
+
+    print(f"Found {len(pairs)} image-label pairs")
+
     return pairs
 
-def populate_train_and_val(train_pairs:list, val_pairs:list, image_train_target_dir, labels_train_target_dir, image_val_target_dir, labels_val_target_dir):
-    
-    image_train_target_dir.mkdir(parents=True, exist_ok=True)
-    labels_train_target_dir.mkdir(parents=True, exist_ok=True)
 
-    image_val_target_dir.mkdir(parents=True, exist_ok=True)
-    labels_val_target_dir.mkdir(parents=True, exist_ok=True)
+def split_pairs(pairs, train_ratio=0.8):
+    split_idx = int(len(pairs) * train_ratio)
+    train_pairs = pairs[:split_idx]
+    val_pairs = pairs[split_idx:]
+
+    return train_pairs, val_pairs
+
+
+def populate_train_and_val(train_pairs:list, val_pairs:list):
+    
+    IMAGE_TRAIN_TARGET_DIR.mkdir(parents=True, exist_ok=True)
+    LABELS_TRAIN_TARGET_DIR.mkdir(parents=True, exist_ok=True)
+
+    IMAGE_VAL_TARGET_DIR.mkdir(parents=True, exist_ok=True)
+    LABELS_VAL_TARGET_DIR.mkdir(parents=True, exist_ok=True)
     
     for image_path, labels_path in train_pairs:
-        shutil.move(image_path, image_train_target_dir/image_path.name)
-        shutil.move(labels_path, labels_train_target_dir/labels_path.name)
+        shutil.move(image_path, IMAGE_TRAIN_TARGET_DIR/image_path.name)
+        shutil.move(labels_path, LABELS_TRAIN_TARGET_DIR/labels_path.name)
 
     for image_path,labels_path in val_pairs:
-        shutil.move(image_path, image_val_target_dir/image_path.name)
-        shutil.move(labels_path, labels_val_target_dir/labels_path.name)
+        shutil.move(image_path, IMAGE_VAL_TARGET_DIR/image_path.name)
+        shutil.move(labels_path, LABELS_VAL_TARGET_DIR/labels_path.name)
 
-    assert len(list(image_train_target_dir.iterdir())) == len(list(labels_train_target_dir.iterdir()))
-    assert len(list(image_val_target_dir.iterdir())) == len(list(labels_val_target_dir.iterdir()))
+    assert len(list(IMAGE_TRAIN_TARGET_DIR.iterdir())) == len(list(LABELS_TRAIN_TARGET_DIR.iterdir()))
+    assert len(list(IMAGE_VAL_TARGET_DIR.iterdir())) == len(list(LABELS_VAL_TARGET_DIR.iterdir()))
 
-# def remove_duplicates(source_dir):
-#     image_train_dir = Path('./images/train')
-#     image_val_dir = Path('./images/val')
+def remove_duplicates(SOURCE_DIR):
+    image_train_dir = Path('./images/train')
+    image_val_dir = Path('./images/val')
 
-#     existing_images = {image.name for image in image_train_dir.iterdir()} | {image.name for image in image_val_dir.iterdir()}
+    if not image_train_dir.exists():
+        image_train_dir.mkdir(parents=True, exist_ok=True)
 
-#     for image in source_dir.iterdir():
-#         image_path = Path(source_dir/image.name)
+    if not image_val_dir.exists():
+        image_val_dir.mkdir(parents=True, exist_ok=True)
 
-#         if image.name in existing_images:
-#             image_path.unlink(missing_ok=True)
+    existing_images = {image.name for image in image_train_dir.iterdir()} | {image.name for image in image_val_dir.iterdir()}
+    
+    for image in SOURCE_DIR.iterdir():
+        image_path = Path(SOURCE_DIR/image.name)
+        label_path = image_path.with_suffix('.txt')
+
+        if image.name in existing_images:
+            image_path.unlink(missing_ok=True)
+            label_path.unlink(missing_ok=True)
